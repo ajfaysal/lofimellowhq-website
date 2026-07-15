@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discography | LofiMellowHQ Official Artist Website</title>
+  <meta name="description" content="Browse the complete discography of LofiMellowHQ with searchable releases and premium listening pathways.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="LofiMellowHQ">
+  <meta name="theme-color" content="#0B1020">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LofiMellowHQ">
+  <meta property="og:title" content="Discography | LofiMellowHQ Official Artist Website">
+  <meta property="og:description" content="Browse the complete discography of LofiMellowHQ with searchable releases.">
+  <meta property="og:url" content="https://lofimellowhq.studio/discography.html">
+  <meta property="og:image" content="https://lofimellowhq.studio/assets/images/og-default.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Discography | LofiMellowHQ Official Artist Website">
+  <meta name="twitter:description" content="Browse the complete discography of LofiMellowHQ with searchable releases.">
+  <meta name="twitter:image" content="https://lofimellowhq.studio/assets/images/og-default.webp">
+  <link rel="canonical" href="https://lofimellowhq.studio/discography.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json" id="structured-data"></script>
+</head>
+<body data-page="discography">
+  <a class="sr-only" href="#main-content">Skip to content</a>
+  <div data-component="header"></div>
+
+  <main id="main-content">
+    <section class="page-hero" aria-labelledby="discography-heading">
+      <div class="container stack-lg">
+        <span class="eyebrow">Discography</span>
+        <h1 class="title-xl" id="discography-heading">Discography</h1>
+        <p>Discover every release from LofiMellowHQ in one calm, searchable, music-first archive.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="library-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Release Library</span>
+          <h2 class="title-lg" id="library-title">Search &amp; Filter</h2>
+        </div>
+
+        <div class="filters" role="search" aria-label="Search and filter releases">
+          <label>
+            <span class="sr-only">Search by title, year, or type</span>
+            <input type="search" data-js="release-search" placeholder="Search by title, year, or type">
+          </label>
+          <label>
+            <span class="sr-only">Filter releases</span>
+            <select data-js="release-filter">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="album">Albums</option>
+              <option value="ep">EPs</option>
+              <option value="single">Singles</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid cards-auto" data-js="discography-list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <div class="container" data-component="player"></div>
+  </main>
+
+  <div data-component="footer"></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
