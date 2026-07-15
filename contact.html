@@ -14,7 +14,11 @@
   <meta property="og:title" content="Contact | LofiMellowHQ Official Artist Website">
   <meta property="og:description" content="Reach out to LofiMellowHQ through the official contact page.">
   <meta property="og:url" content="https://lofimellowhq.studio/contact.html">
+  <meta property="og:locale" content="en_US">
   <meta property="og:image" content="https://lofimellowhq.studio/assets/images/og-default.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/webp">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Contact | LofiMellowHQ Official Artist Website">
   <meta name="twitter:description" content="Reach out to LofiMellowHQ through the official contact page.">
@@ -27,7 +31,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <script type="application/ld+json" id="structured-data"></script>
+  <script type="application/ld+json" id="structured-data">{}</script>
 </head>
 <body data-page="contact">
   <a class="sr-only" href="#main-content">Skip to content</a>
@@ -52,7 +56,7 @@
           <form class="form-grid" data-js="contact-form" novalidate>
             <div class="form-field">
               <label for="name">Name</label>
-              <input id="name" name="name" autocomplete="name" required>
+              <input id="name" name="name" type="text" autocomplete="name" required>
             </div>
             <div class="form-field">
               <label for="email">Email</label>
@@ -60,17 +64,17 @@
             </div>
             <div class="form-field full">
               <label for="subject">Subject</label>
-              <input id="subject" name="subject" required>
+              <input id="subject" name="subject" type="text" required>
             </div>
             <div class="form-field full">
               <label for="message">Message</label>
-              <textarea id="message" name="message" required></textarea>
+              <textarea id="message" name="message" rows="5" required></textarea>
             </div>
             <div class="form-field full">
               <button class="btn btn-primary" type="submit">Submit Message</button>
             </div>
           </form>
-          <p class="form-status" data-js="form-status" aria-live="polite"></p>
+          <div class="form-status" data-js="form-status" role="alert" aria-live="polite"></div>
         </article>
 
         <article class="glass-card form-shell">

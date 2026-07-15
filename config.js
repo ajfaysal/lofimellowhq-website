@@ -275,7 +275,7 @@ export const PAGE_META = {
     title: 'LofiMellowHQ | Official Artist Website',
     description:
       'Official website of LofiMellowHQ. Discover original releases, explore featured music, and connect across streaming platforms.',
-    canonical: '/index.html'
+    canonical: '/'
   },
   music: {
     title: 'Music | LofiMellowHQ Official Artist Website',
