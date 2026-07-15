@@ -30,8 +30,11 @@ const getCurrentPage = () => document.body.dataset.page || 'index';
 
 const pageUrl = (canonicalPath) => `${SITE_CONFIG.domain}${canonicalPath}`;
 
-const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return dateString;
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
 
 const sortReleasesNewest = [...RELEASES].sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
 
@@ -50,28 +53,29 @@ const buildHeader = () => {
   const currentPage = getCurrentPage();
   const navItems = SITE_CONFIG.nav
     .map((item) => {
-      const active = item.href.startsWith(currentPage) || (currentPage === 'index' && item.href === 'index.html');
-      return `<li><a class="nav-link ${active ? 'is-active' : ''}" href="${item.href}">${item.label}</a></li>`;
+      const pageId = item.href.replace('.html', '');
+      const active = pageId === currentPage || (currentPage === 'index' && item.href === 'index.html');
+      const ariaCurrent = active ? ' aria-current="page"' : '';
+      return `<li><a class="nav-link ${active ? 'is-active' : ''}" href="${item.href}"${ariaCurrent}>${item.label}</a></li>`;
     })
     .join('');
 
   return `
-    <header class="site-header" id="top">
+    <header class="site-header" id="top" role="banner">
       <div class="container header-inner">
         <a class="brand" href="index.html" aria-label="${SITE_CONFIG.brandName} home">
-          <img src="${SITE_CONFIG.logoIcon}" width="40" height="40" alt="${SITE_CONFIG.brandName} logo mark">
-          <img src="${SITE_CONFIG.logoWordmark}" class="brand-wordmark" width="150" height="30" alt="${SITE_CONFIG.brandName} wordmark">
+          <img src="${SITE_CONFIG.logoIcon}" width="40" height="40" alt="" aria-hidden="true">
+          <img src="${SITE_CONFIG.logoWordmark}" class="brand-wordmark" width="150" height="30" alt="${SITE_CONFIG.brandName}">
         </a>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" data-js="menu-toggle">
-          <span></span><span></span><span></span>
-          <span class="sr-only">Toggle navigation</span>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-nav" aria-label="Toggle navigation" data-js="menu-toggle">
+          <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
         </button>
         <nav class="main-nav" aria-label="Primary navigation">
-          <ul>${navItems}</ul>
+          <ul role="list">${navItems}</ul>
         </nav>
       </div>
       <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation" hidden>
-        <ul>${navItems}</ul>
+        <ul role="list">${navItems}</ul>
       </nav>
     </header>
   `;
@@ -83,7 +87,7 @@ const buildFooterLinks = (keys) => {
     .filter((item) => safeLink(item.url))
     .map(
       (item) =>
-        `<li><a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.name}</a></li>`
+        `<li><a href="${item.url}" target="_blank" rel="noopener noreferrer" aria-label="${item.name} (opens in new tab)">${item.name}</a></li>`
     )
     .join('');
   return items || '<li><span class="muted">Profiles will appear here after links are configured.</span></li>';
@@ -96,27 +100,27 @@ const buildFooter = () => {
     .join('');
 
   return `
-    <footer class="site-footer">
+    <footer class="site-footer" role="contentinfo">
       <div class="container footer-grid">
         <div>
           <a class="brand brand-footer" href="index.html" aria-label="${SITE_CONFIG.brandName} home">
-            <img src="${SITE_CONFIG.logoIcon}" width="36" height="36" alt="${SITE_CONFIG.brandName} logo mark">
+            <img src="${SITE_CONFIG.logoIcon}" width="36" height="36" alt="" aria-hidden="true">
             <span>${SITE_CONFIG.brandName}</span>
           </a>
           <p class="footer-copy">Original music crafted for focus, calm listening, and creative flow.</p>
         </div>
-        <div>
+        <nav aria-label="Footer navigation">
           <h2 class="footer-title">Quick Navigation</h2>
-          <ul class="footer-list">${navLinks}</ul>
-        </div>
+          <ul class="footer-list" role="list">${navLinks}</ul>
+        </nav>
         <div>
           <h2 class="footer-title">Streaming Platforms</h2>
-          <ul class="footer-list">${buildFooterLinks(['spotify', 'appleMusic', 'youtubeMusic', 'youtube', 'soundcloud', 'bandcamp'])}</ul>
+          <ul class="footer-list" role="list">${buildFooterLinks(['spotify', 'appleMusic', 'youtubeMusic', 'youtube', 'soundcloud', 'bandcamp'])}</ul>
         </div>
         <div>
           <h2 class="footer-title">Social Media</h2>
-          <ul class="footer-list">${buildFooterLinks(['instagram', 'tiktok', 'x', 'facebook'])}</ul>
-          <ul class="footer-list compact">${policyLinks}</ul>
+          <ul class="footer-list" role="list">${buildFooterLinks(['instagram', 'tiktok', 'x', 'facebook'])}</ul>
+          <ul class="footer-list compact" role="list">${policyLinks}</ul>
         </div>
       </div>
       <div class="container footer-meta">
@@ -160,9 +164,13 @@ const initNavigation = () => {
 
   mobileNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
 
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !mobileNav.hidden) closeMenu();
+  });
+
   window.addEventListener('scroll', () => {
     header.classList.toggle('is-scrolled', window.scrollY > 32);
-  });
+  }, { passive: true });
 };
 
 const createPlatformCard = (platformKey) => {
@@ -172,10 +180,10 @@ const createPlatformCard = (platformKey) => {
 
   const card = createElement('article', 'glass-card platform-card');
   card.innerHTML = `
-    <img src="${metadata.icon}" width="32" height="32" alt="${metadata.name} icon">
+    <img src="${metadata.icon}" width="32" height="32" alt="" aria-hidden="true">
     <h3>${metadata.name}</h3>
     <p>${metadata.cta}</p>
-    <a class="btn btn-outline" href="${url}" target="_blank" rel="noopener noreferrer">Open ${iconArrow}</a>
+    <a class="btn btn-outline" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Open ${metadata.name} (opens in new tab)">Open ${iconArrow}</a>
   `;
   return card;
 };
@@ -206,7 +214,7 @@ const createStreamingButtons = (links = {}) => {
   const linksHtml = streamingKeys
     .map((key) => {
       if (!safeLink(links[key])) return '';
-      return `<a class="btn btn-icon" href="${links[key]}" target="_blank" rel="noopener noreferrer"><img src="${PLATFORM_META[key].icon}" width="18" height="18" alt="${PLATFORM_META[key].name} icon"><span>${PLATFORM_META[key].name}</span></a>`;
+      return `<a class="btn btn-icon" href="${links[key]}" target="_blank" rel="noopener noreferrer" aria-label="${PLATFORM_META[key].name} (opens in new tab)"><img src="${PLATFORM_META[key].icon}" width="18" height="18" alt="" aria-hidden="true"><span>${PLATFORM_META[key].name}</span></a>`;
     })
     .join('');
 
@@ -356,11 +364,16 @@ const bindPlayerEvents = (slot) => {
 
     if (!audio.src) return;
     if (audio.paused) {
-      audio.play();
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => { /* Autoplay prevented */ });
+      }
       playPause.textContent = 'Pause';
+      playPause.setAttribute('aria-label', 'Pause track');
     } else {
       audio.pause();
       playPause.textContent = 'Play';
+      playPause.setAttribute('aria-label', 'Play track');
     }
   });
 
@@ -388,6 +401,7 @@ const bindPlayerEvents = (slot) => {
   muteToggle?.addEventListener('click', () => {
     audio.muted = !audio.muted;
     muteToggle.textContent = audio.muted ? 'Unmute' : 'Mute';
+    muteToggle.setAttribute('aria-label', audio.muted ? 'Unmute audio' : 'Mute audio');
   });
 
   audio.addEventListener('ended', () => {
@@ -397,19 +411,22 @@ const bindPlayerEvents = (slot) => {
   });
 
   audio.addEventListener('loadedmetadata', () => {
-    slot.querySelector('[data-js="duration"]').textContent = toTime(audio.duration);
+    const durationEl = slot.querySelector('[data-js="duration"]');
+    if (durationEl) durationEl.textContent = toTime(audio.duration);
   });
 
   audio.addEventListener('timeupdate', () => {
     if (!audio.duration) return;
-    progress.value = String((audio.currentTime / audio.duration) * 100);
-    slot.querySelector('[data-js="current-time"]').textContent = toTime(audio.currentTime);
+    if (progress) progress.value = String((audio.currentTime / audio.duration) * 100);
+    const currentTimeEl = slot.querySelector('[data-js="current-time"]');
+    if (currentTimeEl) currentTimeEl.textContent = toTime(audio.currentTime);
   });
 
   document.addEventListener('keydown', (event) => {
-    if (!(event.altKey && event.code === 'Space')) return;
-    event.preventDefault();
-    playPause?.click();
+    if (event.key === 'k' && (event.metaKey || event.ctrlKey)) {
+      event.preventDefault();
+      playPause?.click();
+    }
   });
 };
 
@@ -433,7 +450,12 @@ const playCurrentTrack = () => {
   if (!track || !audio) return;
 
   audio.src = track.src;
-  audio.play();
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(() => {
+      /* Autoplay was prevented — user must interact first */
+    });
+  }
 
   const player = document.querySelector('.audio-player');
   if (!player) return;
@@ -444,12 +466,14 @@ const playCurrentTrack = () => {
   const button = player.querySelector('[data-js="play-pause"]');
   const live = player.querySelector('[data-js="live-region"]');
 
-  cover.src = track.cover;
-  cover.alt = `${track.releaseTitle} cover artwork`;
-  title.textContent = track.title;
-  artist.textContent = `${SITE_CONFIG.brandName} · ${track.releaseTitle}`;
-  button.textContent = 'Pause';
-  live.textContent = `Now playing ${track.title}`;
+  if (cover) {
+    cover.src = track.cover;
+    cover.alt = `${track.releaseTitle} cover artwork`;
+  }
+  if (title) title.textContent = track.title;
+  if (artist) artist.textContent = `${SITE_CONFIG.brandName} · ${track.releaseTitle}`;
+  if (button) button.textContent = 'Pause';
+  if (live) live.textContent = `Now playing ${track.title}`;
 };
 
 const renderHome = () => {
@@ -519,10 +543,6 @@ const renderDiscography = () => {
 
   if (!listSlot || !searchInput || !filterSelect) return;
 
-  listSlot.innerHTML = Array.from({ length: 6 })
-    .map(() => '<article class="glass-card skeleton-card" aria-hidden="true"></article>')
-    .join('');
-
   const renderFiltered = () => {
     const term = searchInput.value.trim().toLowerCase();
     const filter = filterSelect.value;
@@ -543,7 +563,7 @@ const renderDiscography = () => {
     renderReleaseList('[data-js="discography-list"]', items, true);
   };
 
-  window.setTimeout(renderFiltered, 550);
+  renderFiltered();
   searchInput.addEventListener('input', renderFiltered);
   filterSelect.addEventListener('change', renderFiltered);
 };
@@ -620,10 +640,14 @@ const renderContact = () => {
     const subject = String(formData.get('subject') || '').trim();
     const message = String(formData.get('message') || '').trim();
 
-    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const errors = [];
+    if (!name) errors.push('Name is required.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('A valid email is required.');
+    if (!subject) errors.push('Subject is required.');
+    if (message.length < 20) errors.push('Message should be at least 20 characters.');
 
-    if (!name || !emailValid || !subject || message.length < 20) {
-      status.textContent = 'Please complete every field with valid details. Message text should be at least 20 characters.';
+    if (errors.length) {
+      status.textContent = errors.join(' ');
       status.className = 'form-status error';
       return;
     }
@@ -665,6 +689,17 @@ const setMeta = () => {
   if (canonical) canonical.href = canonicalHref;
 };
 
+const durationToISO = (dur) => {
+  if (!dur || typeof dur !== 'string') return dur;
+  const parts = dur.split(':');
+  if (parts.length === 2) {
+    const m = parseInt(parts[0], 10);
+    const s = parseInt(parts[1], 10);
+    if (!Number.isNaN(m) && !Number.isNaN(s)) return `PT${m}M${s}S`;
+  }
+  return dur;
+};
+
 const setStructuredData = () => {
   const page = getCurrentPage();
   const meta = PAGE_META[page] || PAGE_META.index;
@@ -685,73 +720,89 @@ const setStructuredData = () => {
     numTracks: release.tracks.length
   }));
 
-  const graph = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      '@id': `${SITE_CONFIG.domain}/#organization`,
-      name: SITE_CONFIG.brandName,
-      url: SITE_CONFIG.domain,
-      logo: pageUrl(`/${SITE_CONFIG.logoIcon}`)
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'MusicGroup',
-      '@id': `${SITE_CONFIG.domain}/#musicgroup`,
-      name: SITE_CONFIG.brandName,
-      url: SITE_CONFIG.domain,
-      sameAs: Object.values(PLATFORM_LINKS).filter(safeLink)
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      '@id': `${SITE_CONFIG.domain}/#website`,
-      name: `${SITE_CONFIG.brandName} Official Website`,
-      url: SITE_CONFIG.domain,
-      inLanguage: SITE_CONFIG.language,
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: `${SITE_CONFIG.domain}/discography.html?query={search_term_string}`,
-        'query-input': 'required name=search_term_string'
-      }
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      '@id': `${canonicalHref}#webpage`,
-      url: canonicalHref,
-      name: meta.title,
-      description: meta.description,
-      isPartOf: { '@id': `${SITE_CONFIG.domain}/#website` },
-      about: { '@id': `${SITE_CONFIG.domain}/#musicgroup` }
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_CONFIG.domain}/index.html` },
-        { '@type': 'ListItem', position: 2, name: SITE_CONFIG.nav.find((item) => item.href.startsWith(page))?.label || 'Page', item: canonicalHref }
-      ]
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'MusicAlbum',
-      name: featured.title,
-      byArtist: {
-        '@type': 'MusicGroup',
-        name: SITE_CONFIG.brandName
-      },
-      datePublished: featured.releaseDate,
-      image: pageUrl(`/${featured.cover}`),
-      track: featured.tracks.map((track, idx) => ({
-        '@type': 'MusicRecording',
-        position: idx + 1,
-        name: track.title,
-        duration: track.duration
-      }))
-    },
-    ...topAlbums
+  const breadcrumbItems = [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE_CONFIG.domain}/` }
   ];
+  if (page !== 'index') {
+    const navMatch = SITE_CONFIG.nav.find((item) => item.href.replace('.html', '') === page);
+    breadcrumbItems.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: navMatch?.label || meta.title.split('|')[0].trim(),
+      item: canonicalHref
+    });
+  }
+
+  const graph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE_CONFIG.domain}/#organization`,
+        name: SITE_CONFIG.brandName,
+        url: SITE_CONFIG.domain,
+        logo: {
+          '@type': 'ImageObject',
+          url: pageUrl(`/${SITE_CONFIG.logoIcon}`)
+        }
+      },
+      {
+        '@type': 'MusicGroup',
+        '@id': `${SITE_CONFIG.domain}/#musicgroup`,
+        name: SITE_CONFIG.brandName,
+        url: SITE_CONFIG.domain,
+        sameAs: Object.values(PLATFORM_LINKS).filter(safeLink)
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_CONFIG.domain}/#website`,
+        name: `${SITE_CONFIG.brandName} Official Website`,
+        url: SITE_CONFIG.domain,
+        inLanguage: SITE_CONFIG.language,
+        publisher: { '@id': `${SITE_CONFIG.domain}/#organization` },
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${SITE_CONFIG.domain}/discography.html?query={search_term_string}`
+          },
+          'query-input': 'required name=search_term_string'
+        }
+      },
+      {
+        '@type': 'WebPage',
+        '@id': `${canonicalHref}#webpage`,
+        url: canonicalHref,
+        name: meta.title,
+        description: meta.description,
+        isPartOf: { '@id': `${SITE_CONFIG.domain}/#website` },
+        about: { '@id': `${SITE_CONFIG.domain}/#musicgroup` },
+        inLanguage: SITE_CONFIG.language
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbItems
+      },
+      {
+        '@type': 'MusicAlbum',
+        name: featured.title,
+        byArtist: {
+          '@type': 'MusicGroup',
+          name: SITE_CONFIG.brandName
+        },
+        datePublished: featured.releaseDate,
+        image: pageUrl(`/${featured.cover}`),
+        numTracks: featured.tracks.length,
+        track: featured.tracks.map((track, idx) => ({
+          '@type': 'MusicRecording',
+          position: idx + 1,
+          name: track.title,
+          duration: durationToISO(track.duration)
+        }))
+      },
+      ...topAlbums
+    ]
+  };
 
   jsonLdNode.textContent = JSON.stringify(graph);
 };

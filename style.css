@@ -132,12 +132,37 @@ main {
 .sr-only {
   border: 0;
   clip: rect(0, 0, 0, 0);
-  height: 0.063rem;
-  margin: -0.063rem;
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
   overflow: hidden;
   padding: 0;
   position: absolute;
-  width: 0.063rem;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.sr-only:focus,
+.sr-only:active {
+  clip: auto;
+  clip-path: none;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: fixed;
+  top: var(--space-sm);
+  left: var(--space-sm);
+  z-index: 9999;
+  width: auto;
+  white-space: normal;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0.25rem 1rem var(--color-shadow);
 }
 
 /* =====================================================
@@ -287,6 +312,7 @@ body[data-page="index"] .hero-backdrop {
 .site-header.is-scrolled {
   background: rgba(11, 16, 32, 0.74);
   backdrop-filter: blur(0.875rem);
+  -webkit-backdrop-filter: blur(0.875rem);
   border-color: var(--color-border);
 }
 
@@ -325,6 +351,7 @@ body[data-page="index"] .hero-backdrop {
   right: 0;
   background: rgba(11, 16, 32, 0.94);
   backdrop-filter: blur(0.875rem);
+  -webkit-backdrop-filter: blur(0.875rem);
   border-bottom: 0.063rem solid var(--color-border);
   padding: var(--space-md);
 }
@@ -402,6 +429,7 @@ body[data-page="index"] .hero-backdrop {
   border-radius: var(--radius-lg);
   box-shadow: 0 1.25rem 3rem -1.75rem var(--color-shadow), 0 0 0.063rem rgba(248, 250, 252, 0.12);
   backdrop-filter: blur(0.875rem);
+  -webkit-backdrop-filter: blur(0.875rem);
 }
 
 .btn {
@@ -841,5 +869,62 @@ body[data-page="index"] .hero-backdrop {
 
   .title-xl {
     font-size: clamp(var(--text-2xl), 9vw, var(--text-3xl));
+  }
+}
+
+/* =====================================================
+   8. Reduced Motion
+===================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* =====================================================
+   9. Print
+===================================================== */
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  .site-header,
+  .site-footer,
+  .audio-player,
+  .menu-toggle,
+  .mobile-nav,
+  .hero-overlay,
+  .hero-backdrop,
+  .hero::after {
+    display: none !important;
+  }
+
+  .glass-card {
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript:"]::after {
+    content: "";
   }
 }
